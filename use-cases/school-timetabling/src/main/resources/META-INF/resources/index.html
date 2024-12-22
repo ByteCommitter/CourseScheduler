@@ -7,12 +7,33 @@
     <link rel="stylesheet" href="/webjars/font-awesome/css/all.css" />
 </head>
 <body>
+<div class="container-fluid">
+    <div class="sticky-top d-flex justify-content-center align-items-center">
+        <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand" href="/">
+                <img src="optaplanner.svg" alt="OptaPlanner"/> School Timetabling
+            </a>
+        </nav>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4 box-shadow">
+                    <div class="card-header">
+                        <h4 class="my-0 font-weight-normal">School Timetabling</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Generate school lesson schedules for teachers and students.</p>
+                        <button class="btn btn-lg btn-block btn-primary" onclick="window.location.href='/timeTable.html'">
+                            Try now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="https://www.optaplanner.org">
-            <img src="optaPlannerLogo200px.png" alt="OptaPlanner logo">
-        </a>
-    </nav>
     <div class="sticky-top d-flex justify-content-center align-items-center" aria-live="polite" aria-atomic="true">
         <div id="notificationPanel" style="position: absolute; top: .5rem;"></div>
     </div>
