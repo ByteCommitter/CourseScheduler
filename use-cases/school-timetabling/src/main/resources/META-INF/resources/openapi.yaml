@@ -1,0 +1,35 @@
+# ...existing code...
+  /roomSchedule/{roomId}:
+    get:
+      summary: Get room schedule
+      description: Returns the weekly schedule for a specific room
+      tags:
+        - Room Schedule Resource
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomSchedule'
+        '404':
+          description: Room not found
+# ...existing code...
+components:
+  schemas:
+    RoomSchedule:
+      type: object
+      properties:
+        room:
+          $ref: '#/components/schemas/Room'
+        weeklyLessons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lesson'

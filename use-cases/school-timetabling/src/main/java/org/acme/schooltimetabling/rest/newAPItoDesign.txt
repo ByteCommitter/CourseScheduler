@@ -1,0 +1,41 @@
+#First Task:
+Basically we have to design a new API such that we can get the json response
+filled with the weekly schedule given a room. 
+
+We have the following existing REST APIs:
+
+
+Existing REST APIs:
+Hello Resource:
+GET /hello: Returns a hello message.'
+
+Lesson Resource
+GET /lessons: Retrieve a list of lessons.
+POST /lessons: Create a new lesson.
+GET /lessons/count: Retrieve the count of lessons.
+GET /lessons/{id}: Retrieve a lesson by its ID.
+PUT /lessons/{id}: Update a lesson by its ID.
+DELETE /lessons/{id}: Delete a lesson by its ID.
+
+Room Resource
+GET /rooms: Retrieve a list of rooms.
+POST /rooms: Create a new room.
+GET /rooms/count: Retrieve the count of rooms.
+GET /rooms/{id}: Retrieve a room by its ID.
+PUT /rooms/{id}: Update a room by its ID.
+DELETE /rooms/{id}: Delete a room by its ID.
+
+Timeslot Resource
+GET /timeslots: Retrieve a list of timeslots.
+POST /timeslots: Create a new timeslot.
+GET /timeslots/count: Retrieve the count of timeslots.
+GET /timeslots/{id}: Retrieve a timeslot by its ID.
+PUT /timeslots/{id}: Update a timeslot by its ID.
+DELETE /timeslots/{id}: Delete a timeslot by its ID.
+
+Time Table Resource
+GET /timeTable: Retrieve the timetable.
+POST /timeTable/solve: Solve the timetable.
+
+
+#Second Task:
