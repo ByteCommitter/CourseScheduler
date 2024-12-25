@@ -32,10 +32,12 @@ public class DemoDataGenerator {
     RoomRepository roomRepository;
     @Inject
     LessonRepository lessonRepository;
+    @ConfigProperty(name = "demo.data.enabled", defaultValue = "false")
+    boolean isDemoDataEnabled;
 
     @Transactional
     public void generateDemoData(@Observes StartupEvent startupEvent) {
-        if (demoData == DemoData.NONE) {
+        if (!isDemoDataEnabled) {
             return;
         }
 

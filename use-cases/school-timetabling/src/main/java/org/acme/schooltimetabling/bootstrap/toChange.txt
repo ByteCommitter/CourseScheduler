@@ -3,3 +3,5 @@ Consider slots 1 to 9, instead of time to use
 Use say 10 classrooms, and say 6 Courses
 The Courses are mapped to the faculty
 Refer to Schema Image
+
+Change 2nd API's output response format.

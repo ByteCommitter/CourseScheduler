@@ -12,6 +12,7 @@ import org.acme.schooltimetabling.persistence.RoomRepository;
 import org.acme.schooltimetabling.persistence.TimeslotRepository;
 import org.optaplanner.core.api.solver.SolverManager;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import com.opencsv.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,31 @@ public class TimetableGeneratorService {
         timeslotRepository.persist(timeslots);
         lessonRepository.persist(lessons);
         
-        return new TimeTable(timeslots, rooms, lessons);
+        TimeTable problem = new TimeTable(timeslots, rooms, lessons);
+        
+        try {
+            // Generate unique problem ID
+            Long problemId = System.currentTimeMillis();
+            logger.info("Submitting problem with ID: {}", problemId);
+            
+            // Submit problem to solver
+            return solverManager.solveAndListen(
+                problemId,
+                (timeTableId) -> problem,
+                // Solution handler
+                (timeTable) -> {
+                    logger.info("New best solution found: {}", timeTable.getScore());
+                },
+                // Problem handler
+                (timeTableId, throwable) -> {
+                    logger.error("Solver failed for problem {}", timeTableId, throwable);
+                }
+            ).getFinalBestSolution();
+            
+        } catch (ExecutionException | InterruptedException e) {
+            logger.error("Solver execution failed", e);
+            throw new RuntimeException("Failed to solve timetable", e);
+        }
     }
 
     private List<Room> createRooms(int roomCount) {
