@@ -11,6 +11,7 @@ import org.acme.schooltimetabling.domain.TimeTable;
 import org.acme.schooltimetabling.persistence.LessonRepository;
 import org.acme.schooltimetabling.persistence.RoomRepository;
 import org.acme.schooltimetabling.persistence.TimeslotRepository;
+import org.acme.schooltimetabling.service.TimetableGeneratorService;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.solver.SolutionManager;
 import org.optaplanner.core.api.solver.SolverManager;
@@ -87,5 +88,7 @@ public class TimeTableResource {
             attachedLesson.setRoom(lesson.getRoom());
         }
     }
+
+    
 
 }
