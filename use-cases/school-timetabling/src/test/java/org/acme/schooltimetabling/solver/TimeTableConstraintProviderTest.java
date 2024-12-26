@@ -17,12 +17,12 @@ import io.quarkus.test.junit.QuarkusTest;
 @QuarkusTest
 class TimeTableConstraintProviderTest {
 
-    // private static final Room ROOM1 = new Room();
-    // private static final Room ROOM2 = new Room(2, "Room2");
-    // private static final Timeslot TIMESLOT1 = new Timeslot(1, DayOfWeek.MONDAY, LocalTime.NOON);
-    // private static final Timeslot TIMESLOT2 = new Timeslot(2, DayOfWeek.TUESDAY, LocalTime.NOON);
-    // private static final Timeslot TIMESLOT3 = new Timeslot(3, DayOfWeek.TUESDAY, LocalTime.NOON.plusHours(1));
-    // private static final Timeslot TIMESLOT4 = new Timeslot(4, DayOfWeek.TUESDAY, LocalTime.NOON.plusHours(3));
+    private static final Room ROOM1 = new Room(1L, "Room1");
+    private static final Room ROOM2 = new Room(2L, "Room2");
+    private static final Timeslot TIMESLOT1 = new Timeslot(1L, 1, 0); // Monday, first slot
+    private static final Timeslot TIMESLOT2 = new Timeslot(2L, 2, 0); // Tuesday, first slot
+    private static final Timeslot TIMESLOT3 = new Timeslot(3L, 2, 1); // Tuesday, second slot
+    private static final Timeslot TIMESLOT4 = new Timeslot(4L, 2, 3); // Tuesday, fourth slot
 
     // @Inject
     // ConstraintVerifier<TimeTableConstraintProvider, TimeTable> constraintVerifier;

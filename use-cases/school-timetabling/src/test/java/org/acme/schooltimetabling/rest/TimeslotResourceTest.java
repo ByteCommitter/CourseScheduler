@@ -26,9 +26,8 @@ public class TimeslotResourceTest {
                 .extract().body().jsonPath().getList(".", Timeslot.class);
         assertFalse(timeslotList.isEmpty());
         Timeslot firstTimeslot = timeslotList.get(0);
-        assertEquals(DayOfWeek.MONDAY, firstTimeslot.getDayOfWeek());
-        assertEquals(LocalTime.of(8, 30), firstTimeslot.getStartTime());
-        assertEquals(LocalTime.of(9, 30), firstTimeslot.getEndTime());
+        assertEquals(1, firstTimeslot.getDayOfWeek()); // Monday
+        assertEquals(0, firstTimeslot.getSlot()); // First slot
     }
 
     @Test
@@ -36,7 +35,7 @@ public class TimeslotResourceTest {
         Timeslot timeslot = given()
                 .when()
                 .contentType(ContentType.JSON)
-                .body(new Timeslot(DayOfWeek.SUNDAY, LocalTime.of(20, 0), LocalTime.of(21, 0)))
+                .body(new Timeslot(null, 0, 4)) // Sunday, fifth slot
                 .post("/timeslots")
                 .then()
                 .statusCode(201)

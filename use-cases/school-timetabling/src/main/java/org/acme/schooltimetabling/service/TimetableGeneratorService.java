@@ -1,7 +1,6 @@
 package org.acme.schooltimetabling.service;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -88,12 +87,10 @@ public class TimetableGeneratorService {
 
     private List<Timeslot> createTimeslots(int slotCount) {
         List<Timeslot> timeslots = new ArrayList<>();
-        for (DayOfWeek day : DayOfWeek.values()) {
-            if (day.getValue() <= 5) { // Monday to Friday
-                for (int slot = 0; slot < slotCount; slot++) {
-                    LocalTime startTime = LocalTime.of(8, 0).plusHours(slot);
-                    timeslots.add(new Timeslot(day, startTime, startTime.plusMinutes(50)));
-                }
+        // Days 0-4 (Monday-Friday)
+        for (int day = 0; day < 5; day++) {
+            for (int slot = 0; slot < slotCount; slot++) {
+                timeslots.add(new Timeslot(null, day, slot));
             }
         }
         return timeslots;

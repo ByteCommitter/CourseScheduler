@@ -1,5 +1,10 @@
 var autoRefreshIntervalId = null;
 const dateTimeFormatter = JSJoda.DateTimeFormatter.ofPattern('HH:mm')
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function getDayName(dayNumber) {
+    return DAYS[dayNumber] || `Day ${dayNumber}`;
+}
 
 $(document).ready(function () {
   $.ajaxSetup({
@@ -102,12 +107,7 @@ function refreshTimeTable() {
       const rowByRoom = $("<tr>").appendTo(tbodyByRoom);
       rowByRoom
         .append($(`<th class="align-middle"/>`)
-          .append($("<span/>").text(`
-                    ${timeslot.dayOfWeek.charAt(0) + timeslot.dayOfWeek.slice(1).toLowerCase()}
-                    ${LocalTime.parse(timeslot.startTime).format(dateTimeFormatter)}
-                    -
-                    ${LocalTime.parse(timeslot.endTime).format(dateTimeFormatter)}
-                `)
+          .append($("<span/>").text(`${getDayName(timeslot.dayOfWeek)}, Slot ${timeslot.slot}`)
             .append($(`<button type="button" class="ml-2 mb-1 btn btn-light btn-sm p-1"/>`)
               .append($(`<small class="fas fa-trash"/>`)
               ).click(() => deleteTimeslot(timeslot)))));
@@ -231,9 +231,8 @@ function deleteLesson(lesson) {
 
 function addTimeslot() {
   $.post("/timeslots", JSON.stringify({
-    "dayOfWeek": $("#timeslot_dayOfWeek").val().trim().toUpperCase(),
-    "startTime": $("#timeslot_startTime").val().trim(),
-    "endTime": $("#timeslot_endTime").val().trim()
+    "dayOfWeek": parseInt($("#timeslot_dayOfWeek").val().trim()),
+    "slot": parseInt($("#timeslot_slot").val().trim())
   }), function () {
     refreshTimeTable();
   }).fail(function (xhr, ajaxOptions, thrownError) {
@@ -328,16 +327,7 @@ function nextColor() {
     while (base >= divisor) {
       divisor *= 2;
     }
-    base = (base * 2) - divisor + 1;
-    let shadePercentage = base / divisor;
-    color = buildPercentageColor(floorColor, ceilColor, shadePercentage);
-  }
-  nextColorCount++;
-  return "#" + color.toString(16);
-}
-
-function buildPercentageColor(floorColor, ceilColor, shadePercentage) {
-  let red = (floorColor & 0xFF0000) + Math.floor(shadePercentage * ((ceilColor & 0xFF0000) - (floorColor & 0xFF0000))) & 0xFF0000;
+    base = (base * 2) - divisor + 1;    let shadePercentage = base / divisor;    color = buildPercentageColor(floorColor, ceilColor, shadePercentage);  }  nextColorCount++;  return "#" + color.toString(16);}function buildPercentageColor(floorColor, ceilColor, shadePercentage) {  let red = (floorColor & 0xFF0000) + Math.floor(shadePercentage * ((ceilColor & 0xFF0000) - (floorColor & 0xFF0000))) & 0xFF0000;
   let green = (floorColor & 0x00FF00) + Math.floor(shadePercentage * ((ceilColor & 0x00FF00) - (floorColor & 0x00FF00))) & 0x00FF00;
   let blue = (floorColor & 0x0000FF) + Math.floor(shadePercentage * ((ceilColor & 0x0000FF) - (floorColor & 0x0000FF))) & 0x0000FF;
   return red | green | blue;

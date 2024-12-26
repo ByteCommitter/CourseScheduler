@@ -5,6 +5,7 @@ import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
 import org.acme.schooltimetabling.domain.Lesson;
 import org.acme.schooltimetabling.domain.TimeTable;
@@ -48,6 +49,12 @@ public class TimeTableResource {
         return solution;
     }
 
+    @GET
+    @Path("{id}")
+    public TimeTable getById(@PathParam("id") Long id) {
+        return findById(id);
+    }
+
     @POST
     @Path("solve")
     public void solve() {
@@ -71,10 +78,8 @@ public class TimeTableResource {
         if (!SINGLETON_TIME_TABLE_ID.equals(id)) {
             throw new IllegalStateException("There is no timeTable with id (" + id + ").");
         }
-        // Occurs in a single transaction, so each initialized lesson references the same timeslot/room instance
-        // that is contained by the timeTable's timeslotList/roomList.
         return new TimeTable(
-                timeslotRepository.listAll(Sort.by("dayOfWeek").and("startTime").and("endTime").and("id")),
+                timeslotRepository.listAll(Sort.by("dayOfWeek").and("slot").and("id")),
                 roomRepository.listAll(Sort.by("name").and("id")),
                 lessonRepository.listAll(Sort.by("subject").and("teacher").and("studentGroup").and("id")));
     }

@@ -76,9 +76,9 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .join(Lesson.class, Joiners.equal(Lesson::getTeacher),
                         Joiners.equal((lesson) -> lesson.getTimeslot().getDayOfWeek()))
                 .filter((lesson1, lesson2) -> {
-                    Duration between = Duration.between(lesson1.getTimeslot().getEndTime(),
-                            lesson2.getTimeslot().getStartTime());
-                    return !between.isNegative() && between.compareTo(Duration.ofMinutes(30)) <= 0;
+                    int slot1 = lesson1.getTimeslot().getSlot();
+                    int slot2 = lesson2.getTimeslot().getSlot();
+                    return Math.abs(slot1 - slot2) == 1; // Adjacent slots
                 })
                 .reward(HardSoftScore.ONE_SOFT)
                 .asConstraint("Teacher time efficiency");
@@ -93,9 +93,9 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                         Joiners.equal(Lesson::getStudentGroup),
                         Joiners.equal((lesson) -> lesson.getTimeslot().getDayOfWeek()))
                 .filter((lesson1, lesson2) -> {
-                    Duration between = Duration.between(lesson1.getTimeslot().getEndTime(),
-                            lesson2.getTimeslot().getStartTime());
-                    return !between.isNegative() && between.compareTo(Duration.ofMinutes(30)) <= 0;
+                    int slot1 = lesson1.getTimeslot().getSlot();
+                    int slot2 = lesson2.getTimeslot().getSlot();
+                    return Math.abs(slot1 - slot2) == 1; // Adjacent slots
                 })
                 .penalize(HardSoftScore.ONE_SOFT)
                 .asConstraint("Student group subject variety");
