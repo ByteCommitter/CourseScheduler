@@ -15,6 +15,7 @@
   <packaging>pom</packaging>
   <name>OptaPlanner Quickstarts</name>
 
+
   <modules>
     <module>hello-world</module>
     <module>technology/java-spring-boot</module>

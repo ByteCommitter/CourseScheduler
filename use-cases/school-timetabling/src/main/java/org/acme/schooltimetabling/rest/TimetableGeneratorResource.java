@@ -23,7 +23,7 @@ public class TimetableGeneratorResource {
 
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response generateTimetable(
             String csvData,
             @QueryParam("rooms") @DefaultValue("10") int rooms,
@@ -49,8 +49,9 @@ public class TimetableGeneratorResource {
             }
 
             TimeTable timeTable = generatorService.generateTimeTable(csvData, rooms, slots);
-            return Response.ok(timeTable)
-                .type(MediaType.APPLICATION_JSON)
+            String csvOutput = convertToCsv(timeTable);
+            return Response.ok(csvOutput)
+                .header("Content-Disposition", "attachment; filename=schedule.csv")
                 .build();
 
         } catch (Exception e) {
@@ -60,5 +61,26 @@ public class TimetableGeneratorResource {
                 .entity("Failed to generate timetable: " + e.getMessage())
                 .build();
         }
+    }
+
+    private String convertToCsv(TimeTable timeTable) {
+        StringBuilder csv = new StringBuilder();
+        csv.append("room_number,slot_number,faculty_course_section,day_of_the_week\n");
+        
+        timeTable.getLessonList().stream()
+            .filter(lesson -> lesson.getRoom() != null && lesson.getTimeslot() != null)
+            .forEach(lesson -> {
+                int roomNumber = Integer.parseInt(lesson.getRoom().getName().replace("Room ", ""));
+                String facultyCourseSection = String.format("%s_%s_%s", 
+                    lesson.getTeacher(), lesson.getSubject(), lesson.getStudentGroup());
+                
+                csv.append(String.format("%d,%d,%s,%d\n",
+                    roomNumber,
+                    lesson.getTimeslot().getSlot(),
+                    facultyCourseSection,
+                    lesson.getTimeslot().getDayOfWeek()));
+            });
+            
+        return csv.toString();
     }
 }

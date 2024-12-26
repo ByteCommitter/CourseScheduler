@@ -39,3 +39,16 @@ POST /timeTable/solve: Solve the timetable.
 
 
 #Second Task:
+API input - 
+1. CSV containing two columns
+	a. faculty_course_section
+	b. number of hours needed per week
+2. number of rooms (integer for now)
+3. number of slots
+
+
+API output -
+CSV file containing a schedule
+Columns in the schedule CSV
+
+room_number (int), slot_number (int), faculty_course_section, day_of_the_week (int)

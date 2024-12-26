@@ -1,0 +1,8 @@
+room_number,slot_number,faculty_course_section,day_of_the_week
+1,0,MATH_101_A,0
+1,1,MATH_101_A,0
+1,0,MATH_101_A,1
+1,1,PHY_201_B,1
+1,0,PHY_201_B,2
+1,1,PHY_201_B,2
+1,0,PHY_201_B,3
