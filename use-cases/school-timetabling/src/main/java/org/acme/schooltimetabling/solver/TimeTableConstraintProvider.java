@@ -1,6 +1,5 @@
 package org.acme.schooltimetabling.solver;
 
-import java.time.Duration;
 
 import org.acme.schooltimetabling.domain.Lesson;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
@@ -18,6 +17,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 roomConflict(constraintFactory),
                 teacherConflict(constraintFactory),
                 studentGroupConflict(constraintFactory),
+                labContinuityConstraint(constraintFactory), // Add this new constraint
                 // Soft constraints
                 teacherRoomStability(constraintFactory),
                 teacherTimeEfficiency(constraintFactory),
@@ -57,6 +57,33 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                         Joiners.equal(Lesson::getStudentGroup))
                 .penalize(HardSoftScore.ONE_HARD)
                 .asConstraint("Student group conflict");
+    }
+
+    @SuppressWarnings("unchecked")
+    //TODO: Sometimes the previous day's lab continues to the next day in order to seem continuous, fix this
+Constraint labContinuityConstraint(ConstraintFactory constraintFactory) {
+        // Labs must have two continuous slots
+        return constraintFactory
+                .forEach(Lesson.class)
+                .filter(lesson -> lesson.getSubject().toLowerCase().contains("lab")) // Identify lab sessions
+                .join(Lesson.class,
+                        // Same subject, teacher, student group, room, and day
+                        Joiners.equal(Lesson::getSubject),
+                        Joiners.equal(Lesson::getTeacher),
+                        Joiners.equal(Lesson::getStudentGroup),
+                        Joiners.equal(Lesson::getRoom),
+                        Joiners.equal(lesson -> lesson.getTimeslot().getDayOfWeek()))
+                .filter((lesson1, lesson2) -> {
+                    if (lesson1.getTimeslot() == null || lesson2.getTimeslot() == null) {
+                        return false;
+                    }
+                    // Check if slots are consecutive
+                    int slot1 = lesson1.getTimeslot().getSlot();
+                    int slot2 = lesson2.getTimeslot().getSlot();
+                    return Math.abs(slot1 - slot2) != 1; // Penalize if slots are not consecutive
+                })
+                .penalize(HardSoftScore.ONE_HARD)
+                .asConstraint("Lab continuity");
     }
 
     Constraint teacherRoomStability(ConstraintFactory constraintFactory) {

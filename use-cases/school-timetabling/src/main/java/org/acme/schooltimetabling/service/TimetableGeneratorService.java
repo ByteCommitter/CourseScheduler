@@ -103,8 +103,16 @@ public class TimetableGeneratorService {
             String subject = parts[1];
             String studentGroup = parts.length > 2 ? parts[2] : "DEFAULT";
             
-            for (int i = 0; i < req.getHoursPerWeek(); i++) {
+            // If it's a lab, create two lessons that must be scheduled together
+            if (subject.toLowerCase().contains("lab")) {
+                // Create two lessons for the lab
                 lessons.add(new Lesson(subject, teacher, studentGroup));
+                lessons.add(new Lesson(subject, teacher, studentGroup));
+            } else {
+                // Regular lesson
+                for (int i = 0; i < req.getHoursPerWeek(); i++) {
+                    lessons.add(new Lesson(subject, teacher, studentGroup));
+                }
             }
         }
         return lessons;
