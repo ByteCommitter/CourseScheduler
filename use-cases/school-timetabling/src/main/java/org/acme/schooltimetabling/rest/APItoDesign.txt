@@ -68,4 +68,5 @@ MATH_101_A,3,1
 PHY_201_B,4,1
 CS_372_A,4,2
 
-Consider lunch breaks, they shouldn't interfere with 
+Consider lunch breaks, they shouldn't interfere.
+
