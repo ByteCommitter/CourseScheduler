@@ -40,11 +40,11 @@ public class TimetableGeneratorResource {
                     .build();
             }
 
-            if (!csvData.trim().startsWith("faculty_course_section,hours_per_week")) {
+            if (!csvData.trim().startsWith("faculty_course_section,hours_per_week,combined_slots_per_day")) {
                 logger.warn("Invalid CSV format received");
                 return Response.status(Response.Status.BAD_REQUEST)
                     .type(MediaType.TEXT_PLAIN)
-                    .entity("Invalid CSV format. First line must be: faculty_course_section,hours_per_week")
+                    .entity("Invalid CSV format. First line must be: faculty_course_section,hours_per_week,combined_slots_per_day")
                     .build();
             }
 

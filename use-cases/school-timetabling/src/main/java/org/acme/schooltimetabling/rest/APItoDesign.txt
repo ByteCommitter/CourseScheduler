@@ -52,3 +52,20 @@ CSV file containing a schedule
 Columns in the schedule CSV
 
 room_number (int), slot_number (int), faculty_course_section, day_of_the_week (int)
+
+
+
+Third Task:
+Add another parameter to the csv file taking the number of combined_slots_per_day
+Is it possible for the course to take up more than two three slot a day despite having 
+a given combined_slots_per_day =one slot a day?
+
+
+Given sample input of csv:
+
+faculty_course_section,hours_per_week,combined_slots_per_day
+MATH_101_A,3,1
+PHY_201_B,4,1
+CS_372_A,4,2
+
+Consider lunch breaks, they shouldn't interfere with 

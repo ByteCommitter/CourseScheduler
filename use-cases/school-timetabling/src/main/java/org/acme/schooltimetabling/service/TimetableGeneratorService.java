@@ -97,27 +97,36 @@ public class TimetableGeneratorService {
 
     private List<Lesson> createLessons(List<CourseRequest> requests) {
         List<Lesson> lessons = new ArrayList<>();
+        int lessonId = 0;
+        
         for (CourseRequest req : requests) {
             String[] parts = req.getFacultyCourseSection().split("_");
             String teacher = parts[0];
             String subject = parts[1];
             String studentGroup = parts.length > 2 ? parts[2] : "DEFAULT";
+            String courseId = req.getFacultyCourseSection();
             
-            // If it's a lab, create two lessons that must be scheduled together
-            if (subject.toLowerCase().contains("lab")) {
-                // Create two lessons for the lab
-                lessons.add(new Lesson(subject, teacher, studentGroup));
-                lessons.add(new Lesson(subject, teacher, studentGroup));
-            } else {
-                // Regular lesson
-                for (int i = 0; i < req.getHoursPerWeek(); i++) {
-                    lessons.add(new Lesson(subject, teacher, studentGroup));
+            int totalHours = req.getHoursPerWeek();
+            int combinedSlots = req.getCombinedSlotsPerDay();
+            
+            // Calculate how many groups of combined slots we need
+            int numberOfGroups = (int) Math.ceil((double) totalHours / combinedSlots);
+            
+            for (int group = 0; group < numberOfGroups; group++) {
+                int slotsInThisGroup = Math.min(combinedSlots, totalHours);
+                for (int slot = 0; slot < slotsInThisGroup; slot++) {
+                    lessons.add(new Lesson(String.format("%s_G%d", subject, group), 
+                                         teacher, 
+                                         studentGroup, 
+                                         combinedSlots, 
+                                         courseId + "_G" + group));
                 }
+                totalHours -= slotsInThisGroup;
             }
         }
         return lessons;
     }
-
+    
     public List<CourseRequest> parseCsvInput(String csvData) {
         List<CourseRequest> requests = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new StringReader(csvData))) {
@@ -127,6 +136,7 @@ public class TimetableGeneratorService {
                 CourseRequest req = new CourseRequest();
                 req.setFacultyCourseSection(line[0]);
                 req.setHoursPerWeek(Integer.parseInt(line[1]));
+                req.setCombinedSlotsPerDay(Integer.parseInt(line[2]));
                 requests.add(req);
             }
         } catch (Exception e) {

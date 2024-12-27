@@ -1,3 +1,4 @@
-faculty_course_section,hours_per_week
-MATH_101_A,3
-PHY_201_B,4
+faculty_course_section,hours_per_week,combined_slots_per_day
+MATH_101_A,3,1
+PHY_201_B,4,2
+CS_372_A,3,2

@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Column;
 
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.lookup.PlanningId;
@@ -21,6 +22,12 @@ public class Lesson {
     private String subject;
     private String teacher;
     private String studentGroup;
+    
+    @Column(name = "combined_slots_per_day")
+    private Integer combinedSlotsPerDay; // Changed from int to Integer
+    
+    @Column(name = "course_id")
+    private String courseId; // To group related lessons
 
     @PlanningVariable
     @ManyToOne
@@ -37,6 +44,12 @@ public class Lesson {
         this.subject = subject;
         this.teacher = teacher;
         this.studentGroup = studentGroup;
+    }
+
+    public Lesson(String subject, String teacher, String studentGroup, int combinedSlotsPerDay, String courseId) {
+        this(subject, teacher, studentGroup);
+        this.combinedSlotsPerDay = combinedSlotsPerDay;
+        this.courseId = courseId;
     }
 
     public Lesson(long id, String subject, String teacher, String studentGroup, Timeslot timeslot, Room room) {
@@ -69,6 +82,14 @@ public class Lesson {
 
     public String getStudentGroup() {
         return studentGroup;
+    }
+
+    public Integer getCombinedSlotsPerDay() {
+        return combinedSlotsPerDay;
+    }
+
+    public String getCourseId() {
+        return courseId;
     }
 
     public Timeslot getTimeslot() {

@@ -17,7 +17,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 roomConflict(constraintFactory),
                 teacherConflict(constraintFactory),
                 studentGroupConflict(constraintFactory),
-                labContinuityConstraint(constraintFactory), // Add this new constraint
+                courseContinuityConstraint(constraintFactory), // Add this new constraint
                 // Soft constraints
                 teacherRoomStability(constraintFactory),
                 teacherTimeEfficiency(constraintFactory),
@@ -60,30 +60,42 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
     }
 
     @SuppressWarnings("unchecked")
-    //TODO: Sometimes the previous day's lab continues to the next day in order to seem continuous, fix this
-Constraint labContinuityConstraint(ConstraintFactory constraintFactory) {
-        // Labs must have two continuous slots
+    Constraint courseContinuityConstraint(ConstraintFactory constraintFactory) {
         return constraintFactory
                 .forEach(Lesson.class)
-                .filter(lesson -> lesson.getSubject().toLowerCase().contains("lab")) // Identify lab sessions
+                .filter(lesson -> lesson.getCombinedSlotsPerDay() > 1) 
                 .join(Lesson.class,
-                        // Same subject, teacher, student group, room, and day
-                        Joiners.equal(Lesson::getSubject),
-                        Joiners.equal(Lesson::getTeacher),
-                        Joiners.equal(Lesson::getStudentGroup),
-                        Joiners.equal(Lesson::getRoom),
+                        // Match lessons of same course
+                        Joiners.equal(Lesson::getCourseId),
+                        // Must be different lessons
+                        Joiners.lessThan(Lesson::getId),
+                        // Must be same day
                         Joiners.equal(lesson -> lesson.getTimeslot().getDayOfWeek()))
                 .filter((lesson1, lesson2) -> {
                     if (lesson1.getTimeslot() == null || lesson2.getTimeslot() == null) {
                         return false;
                     }
-                    // Check if slots are consecutive
+                    
                     int slot1 = lesson1.getTimeslot().getSlot();
                     int slot2 = lesson2.getTimeslot().getSlot();
-                    return Math.abs(slot1 - slot2) != 1; // Penalize if slots are not consecutive
+                    int combinedSlots = lesson1.getCombinedSlotsPerDay();
+                    
+                    // For lessons that should be combined:
+                    // 1. They must be within the same day (already filtered by join)
+                    // 2. They must be consecutive (difference between slots should be 1)
+                    // 3. They must be part of the same block (distance from first slot should be < combinedSlots)
+                    
+                    // Check if slots are not consecutive
+                    boolean areConsecutive = Math.abs(slot1 - slot2) == 1;
+                    
+                    // Check if slots are within the required group size
+                    boolean withinGroupSize = Math.abs(slot1 - slot2) < combinedSlots;
+                    
+                    // Penalize if either condition is not met
+                    return !areConsecutive || !withinGroupSize;
                 })
-                .penalize(HardSoftScore.ONE_HARD)
-                .asConstraint("Lab continuity");
+                .penalize(HardSoftScore.ofHard(10)) // Increased penalty weight
+                .asConstraint("Course continuity");
     }
 
     Constraint teacherRoomStability(ConstraintFactory constraintFactory) {
