@@ -177,6 +177,12 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <systemProperties>
+            <quarkus.http.port>8080</quarkus.http.port>
+            <quarkus.http.host>0.0.0.0</quarkus.http.host>
+          </systemProperties>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>

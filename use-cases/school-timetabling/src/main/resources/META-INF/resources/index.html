@@ -1,189 +1,82 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>School timetabling - OptaPlanner Quarkus</title>
-    <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="/webjars/font-awesome/css/all.css" />
+    <meta charset="UTF-8">
+    <title>School Timetabling</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<div class="container-fluid">
-    <div class="sticky-top d-flex justify-content-center align-items-center">
-        <nav class="navbar navbar-light bg-light">
-            <a class="navbar-brand" href="/">
-                <img src="optaplanner.svg" alt="OptaPlanner"/> School Timetabling
-            </a>
-        </nav>
-    </div>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card mb-4 box-shadow">
-                    <div class="card-header">
-                        <h4 class="my-0 font-weight-normal">School Timetabling</h4>
+    <div class="container py-5">
+        <h1>School Timetabling Solver</h1>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h3>Generate New Timetable</h3>
+                <form id="uploadForm" class="mt-3">
+                    <div class="form-group">
+                        <label for="csvFile">Upload Course Data (CSV)</label>
+                        <input type="file" class="form-control-file" id="csvFile" accept=".csv">
                     </div>
-                    <div class="card-body">
-                        <p class="card-text">Generate school lesson schedules for teachers and students.</p>
-                        <button class="btn btn-lg btn-block btn-primary" onclick="window.location.href='/timeTable.html'">
-                            Try now
-                        </button>
-                    </div>
-                </div>
+                    <button type="submit" class="btn btn-primary mt-3">Generate Timetable</button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h3>Quick Actions</h3>
+                <button onclick="location.href='/timeTable'" class="btn btn-secondary">View Current Timetable</button>
+                <button onclick="solve()" class="btn btn-success">Solve Timetable</button>
+                <button onclick="stopSolving()" class="btn btn-danger">Stop Solving</button>
             </div>
         </div>
-    </div>
-</div>
-<div class="container">
-    <div class="sticky-top d-flex justify-content-center align-items-center" aria-live="polite" aria-atomic="true">
-        <div id="notificationPanel" style="position: absolute; top: .5rem;"></div>
-    </div>
-    <h1>High school time table solver</h1>
-    <p>Generate the optimal schedule for your teachers and students.</p>
-
-    <div class="mb-2">
-        <button id="refreshButton" type="button" class="btn btn-secondary">
-            <span class="fas fa-refresh"></span> Refresh
-        </button>
-        <button id="solveButton" type="button" class="btn btn-success">
-            <span class="fas fa-play"></span> Solve
-        </button>
-        <button id="stopSolvingButton" type="button" class="btn btn-danger">
-            <span class="fas fa-stop"></span> Stop solving
-        </button>
-        <span id="score" class="score ml-2 align-middle font-weight-bold">Score: ?</span>
-
-        <div class="float-right">
-            <ul class="nav nav-pills" id="myTab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="byRoomTab" data-toggle="tab" href="#byRoomPanel" role="tab" aria-controls="byRoomPanel" aria-selected="true">By room</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="byTeacherTab" data-toggle="tab" href="#byTeacher" role="tab" aria-controls="byTeacher" aria-selected="false">By teacher</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="byStudentGroupTab" data-toggle="tab" href="#byStudentGroup" role="tab" aria-controls="byStudentGroup" aria-selected="false">By student group</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="byRoomPanel" role="tabpanel" aria-labelledby="byRoomTab">
-            <table class="table table-borderless table-striped" id="timeTableByRoom">
-                <!-- Filled in by app.js -->
-            </table>
-        </div>
-        <div class="tab-pane fade" id="byTeacher" role="tabpanel" aria-labelledby="byTeacherTab">
-            <table class="table table-borderless table-striped" id="timeTableByTeacher">
-                <!-- Filled in by app.js -->
-            </table>
-        </div>
-        <div class="tab-pane fade" id="byStudentGroup" role="tabpanel" aria-labelledby="byStudentGroupTab">
-            <table class="table table-borderless table-striped" id="timeTableByStudentGroup">
-                <!-- Filled in by app.js -->
-            </table>
-        </div>
-    </div>
-    <div class="mb-4">
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#lessonDialog">
-            <span class="fas fa-plus"></span> Add lesson
-        </button>
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#timeslotDialog">
-            <span class="fas fa-plus"></span> Add timeslot
-        </button>
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#roomDialog">
-            <span class="fas fa-plus"></span> Add room
-        </button>
     </div>
 
-    <h2>Unassigned lessons</h2>
-    <div id="unassignedLessons" class="card-columns"></div>
-</div>
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+    <script>
+        function solve() {
+            fetch('/timeTable/solve', { method: 'POST' })
+                .then(() => window.location.href = '/timeTable');
+        }
 
+        function stopSolving() {
+            fetch('/timeTable/stopSolving', { method: 'POST' })
+                .then(() => window.location.href = '/timeTable');
+        }
 
-<div class="modal fade" id="lessonDialog" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4>Add a lesson</h4>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="lesson_subject">Subject</label>
-                    <input type="text" class="form-control" id="lesson_subject" required value="Music">
-                </div>
-                <div class="form-group">
-                    <label for="lesson_teacher">Teacher</label>
-                    <input type="text" class="form-control" id="lesson_teacher" required value="B. May">
-                </div>
-                <div class="form-group">
-                    <label for="lesson_studentGroup">Student group</label>
-                    <input type="text" class="form-control" id="lesson_studentGroup" required value="11th grade">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="addLessonSubmitButton">Submit new lesson</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="timeslotDialog" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4>Add a timeslot</h4>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="timeslot_dayOfWeek">Day (0-6, Sunday=0)</label>
-                    <input type="number" class="form-control" id="timeslot_dayOfWeek" 
-                           required min="0" max="6" value="0">
-                </div>
-                <div class="form-group">
-                    <label for="timeslot_slot">Slot Number</label>
-                    <input type="number" class="form-control" id="timeslot_slot" 
-                           required min="0" value="0">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="addTimeslotSubmitButton">Submit new timeslot</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="roomDialog" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4>Add a room</h4>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="room_name">Name</label>
-                    <input type="text" class="form-control" id="room_name" required value="Room D">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="addRoomSubmitButton">Submit new room</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a CSV file');
+                return;
+            }
 
-<script src="/webjars/jquery/jquery.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
-<script src="/webjars/js-joda/dist/js-joda.min.js"></script>
-<script src="/app.js"></script>
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                fetch('/timetable-generator?rooms=10&slots=9', {
+                    method: 'POST',
+                    body: e.target.result,
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    }
+                })
+                .then(response => response.text())
+                .then(data => {
+                    // Create download link for the result
+                    const blob = new Blob([data], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'generated-timetable.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => alert('Error generating timetable: ' + error));
+            };
+            reader.readAsText(file);
+        });
+    </script>
 </body>
 </html>
