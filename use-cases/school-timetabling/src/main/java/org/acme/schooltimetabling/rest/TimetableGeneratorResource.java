@@ -27,16 +27,20 @@ import javax.ws.rs.FormParam;
 import java.nio.file.Files;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import org.optaplanner.core.api.solver.SolverStatus;
+import org.optaplanner.core.api.solver.SolverManager;
 
 @Path("/timetable-generator")
 @ApplicationScoped
-@Tag(name = "Timetable Generator", description = "Generates timetables from CSV file upload")
+@Tag(name = "Timetable Generator", description = "Generate timetable from CSV file upload")
 public class TimetableGeneratorResource {
 
     private static final Logger logger = LoggerFactory.getLogger(TimetableGeneratorResource.class);
 
     @Inject 
     TimetableGeneratorService generatorService;
+    @Inject
+    SolverManager<TimeTable, Long> solverManager;
 
     public static class FileUploadForm {
         @FormParam("file")
@@ -49,7 +53,7 @@ public class TimetableGeneratorResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(
         summary = "Generate timetable from CSV file",
-        description = "Upload a CSV file with course requirements to generate a timetable"
+        description = "Upload CSV file and parameters here"
     )
     @APIResponse(
         responseCode = "200",
@@ -108,6 +112,32 @@ public class TimetableGeneratorResource {
                 .build();
         }
     }
+
+    // @POST
+    // @Path("/solve")
+    // @Produces(MediaType.TEXT_PLAIN)
+    // public Response solveTimetable() {
+    //     try {
+    //         generatorService.solve();
+    //         return Response.ok("Solver started").build();
+    //     } catch (Exception e) {
+    //         logger.error("Failed to start solver", e);
+    //         return Response.serverError().entity("Failed to start solver: " + e.getMessage()).build();
+    //     }
+    // }
+
+    // @GET
+    // @Path("/status")
+    // @Produces(MediaType.TEXT_PLAIN)
+    // public Response getSolverStatus() {
+    //     try {
+    //         SolverStatus status = solverManager.getSolverStatus(TimetableGeneratorService.SINGLETON_TIME_TABLE_ID);
+    //         return Response.ok(status.toString()).build();
+    //     } catch (Exception e) {
+    //         logger.error("Failed to get solver status", e);
+    //         return Response.serverError().entity("Failed to get solver status: " + e.getMessage()).build();
+    //     }
+    // }
 
     private String readInputStream(InputStream input) throws IOException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();

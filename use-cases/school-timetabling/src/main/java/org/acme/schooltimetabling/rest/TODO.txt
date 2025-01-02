@@ -1,3 +1,2 @@
-Remove the G0,G1
 Verify Multiple different outputs...
 Take in aspects of lunch break

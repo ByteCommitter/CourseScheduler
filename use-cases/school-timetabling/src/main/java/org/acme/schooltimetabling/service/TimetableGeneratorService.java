@@ -15,9 +15,12 @@ import com.opencsv.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.StringReader;
+import io.quarkus.panache.common.Sort;
+import java.util.function.Function;
 
 @ApplicationScoped
 public class TimetableGeneratorService {
+    public static final long SINGLETON_TIME_TABLE_ID = 1L;
 
     private static final Logger logger = LoggerFactory.getLogger(TimetableGeneratorService.class);
     
@@ -86,15 +89,85 @@ public class TimetableGeneratorService {
 
     @Transactional
     protected void persistSolution(TimeTable solution) {
-        // Update lessons with their assigned rooms and timeslots
+        if (solution == null || solution.getLessonList() == null) {
+            logger.warn("No solution to persist");
+            return;
+        }
+
         solution.getLessonList().forEach(lesson -> {
-            Lesson entity = lessonRepository.findById(lesson.getId());
-            if (entity != null) {
-                entity.setRoom(lesson.getRoom());
-                entity.setTimeslot(lesson.getTimeslot());
-                lessonRepository.persist(entity);
+            try {
+                Lesson entity = lessonRepository.findById(lesson.getId());
+                if (entity != null) {
+                    entity.setRoom(lesson.getRoom());
+                    entity.setTimeslot(lesson.getTimeslot());
+                    lessonRepository.persist(entity);
+                    logger.debug("Updated lesson {}: room={}, timeslot={}", 
+                        lesson.getId(), 
+                        lesson.getRoom() != null ? lesson.getRoom().getName() : "null",
+                        lesson.getTimeslot() != null ? lesson.getTimeslot().getId() : "null");
+                } else {
+                    logger.warn("Could not find lesson with id {}", lesson.getId());
+                }
+            } catch (Exception e) {
+                logger.error("Failed to persist lesson {}", lesson.getId(), e);
             }
         });
+        
+        // Force a flush to ensure all changes are written
+        lessonRepository.flush();
+    }
+
+    @Transactional
+    public void initializeSolver(TimeTable timeTable) {
+        // Clear any existing solution
+        lessonRepository.streamAll()
+            .forEach(lesson -> {
+                lesson.setRoom(null);
+                lesson.setTimeslot(null);
+                lessonRepository.persist(lesson);
+            });
+
+        try {
+            Long problemId = System.currentTimeMillis();
+            // Fix: Pass the TimeTable directly instead of a Function
+            solverManager.solveAndListen(problemId, id -> timeTable, this::save);
+        } catch (Exception e) {
+            logger.error("Failed to initialize solver", e);
+            throw new RuntimeException("Failed to initialize solver", e);
+        }
+    }
+
+    @Transactional
+    public TimeTable getTimeTable() {
+        return new TimeTable(
+            timeslotRepository.listAll(Sort.by("dayOfWeek").and("slot").and("id")),
+            roomRepository.listAll(Sort.by("name").and("id")),
+            lessonRepository.listAll(Sort.by("subject").and("teacher").and("studentGroup").and("id"))
+        );
+    }
+
+    @Transactional
+    public void solve() {
+        TimeTable timeTable = getTimeTable();
+        solverManager.solveAndListen(
+            SINGLETON_TIME_TABLE_ID,
+            id -> timeTable,
+            this::save
+        );
+    }
+
+
+    @Transactional
+    protected void save(TimeTable timeTable) {
+        timeTable.getLessonList().forEach(lesson -> {
+            Lesson attachedLesson = lessonRepository.findById(lesson.getId());
+            if (attachedLesson != null) {
+                attachedLesson.setTimeslot(lesson.getTimeslot());
+                attachedLesson.setRoom(lesson.getRoom());
+                lessonRepository.persist(attachedLesson);
+            }
+        });
+        lessonRepository.flush();
     }
 
     private List<Room> createRooms(int roomCount) {
