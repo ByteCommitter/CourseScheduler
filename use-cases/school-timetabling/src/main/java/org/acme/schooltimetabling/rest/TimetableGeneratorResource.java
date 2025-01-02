@@ -10,10 +10,27 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.jboss.resteasy.annotations.providers.multipart.PartType;
+import java.io.File;
+import javax.ws.rs.FormParam;
+import java.nio.file.Files;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 @Path("/timetable-generator")
 @ApplicationScoped
-@Tag(name = "Timetable Generator", description = "Generates timetables from CSV input")
+@Tag(name = "Timetable Generator", description = "Generates timetables from CSV file upload")
 public class TimetableGeneratorResource {
 
     private static final Logger logger = LoggerFactory.getLogger(TimetableGeneratorResource.class);
@@ -21,24 +38,53 @@ public class TimetableGeneratorResource {
     @Inject 
     TimetableGeneratorService generatorService;
 
+    public static class FileUploadForm {
+        @FormParam("file")
+        @PartType(MediaType.APPLICATION_OCTET_STREAM)
+        public InputStream inputStream;
+    }
+
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_PLAIN)
+    @Operation(
+        summary = "Generate timetable from CSV file",
+        description = "Upload a CSV file with course requirements to generate a timetable"
+    )
+    @APIResponse(
+        responseCode = "200",
+        description = "Successfully generated timetable",
+        content = @Content(mediaType = MediaType.TEXT_PLAIN)
+    )
     public Response generateTimetable(
-            String csvData,
+            @MultipartForm FileUploadForm form,
+            @Parameter(
+                name = "rooms",
+                description = "Number of rooms available",
+                schema = @Schema(type = SchemaType.INTEGER, defaultValue = "3")
+            )
             @QueryParam("rooms") @DefaultValue("10") int rooms,
+            
+            @Parameter(
+                name = "slots",
+                description = "Number of time slots per day",
+                schema = @Schema(type = SchemaType.INTEGER, defaultValue = "3")
+            )
             @QueryParam("slots") @DefaultValue("9") int slots) {
         
         try {
             logger.info("Received timetable generation request: rooms={}, slots={}", rooms, slots);
             
-            if (csvData == null || csvData.trim().isEmpty()) {
-                logger.warn("Empty CSV data received");
+            if (form.inputStream == null) {
+                logger.warn("No CSV file received");
                 return Response.status(Response.Status.BAD_REQUEST)
                     .type(MediaType.TEXT_PLAIN)
-                    .entity("CSV data cannot be empty")
+                    .entity("CSV file is required")
                     .build();
             }
+
+            // Convert InputStream to String
+            String csvData = readInputStream(form.inputStream);
 
             if (!csvData.trim().startsWith("faculty_course_section,hours_per_week,combined_slots_per_day")) {
                 logger.warn("Invalid CSV format received");
@@ -63,6 +109,16 @@ public class TimetableGeneratorResource {
         }
     }
 
+    private String readInputStream(InputStream input) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = input.read(buffer)) != -1) {
+            result.write(buffer, 0, length);
+        }
+        return result.toString(StandardCharsets.UTF_8.name());
+    }
+
     private String convertToCsv(TimeTable timeTable) {
         StringBuilder csv = new StringBuilder();
         csv.append("room_number,slot_number,faculty_course_section,day_of_the_week\n");
@@ -71,13 +127,13 @@ public class TimetableGeneratorResource {
             .filter(lesson -> lesson.getRoom() != null && lesson.getTimeslot() != null)
             .forEach(lesson -> {
                 int roomNumber = Integer.parseInt(lesson.getRoom().getName().replace("Room ", ""));
-                String facultyCourseSection = String.format("%s_%s_%s", 
-                    lesson.getTeacher(), lesson.getSubject(), lesson.getStudentGroup());
+                // Remove the group indicator from the course ID
+                String courseId = lesson.getCourseId().replaceAll("_G\\d+$", "");
                 
                 csv.append(String.format("%d,%d,%s,%d\n",
                     roomNumber,
                     lesson.getTimeslot().getSlot(),
-                    facultyCourseSection,
+                    courseId,
                     lesson.getTimeslot().getDayOfWeek()));
             });
             

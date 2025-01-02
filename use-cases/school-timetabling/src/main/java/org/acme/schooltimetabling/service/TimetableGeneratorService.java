@@ -40,11 +40,16 @@ public class TimetableGeneratorService {
         List<CourseRequest> requests = parseCsvInput(csvData);
         logger.info("Parsed {} course requests from CSV", requests.size());
         
+        // Clear existing data
+        lessonRepository.deleteAll();
+        roomRepository.deleteAll();
+        timeslotRepository.deleteAll();
+        
         List<Room> rooms = createRooms(roomCount);
         List<Timeslot> timeslots = createTimeslots(slotCount);
         List<Lesson> lessons = createLessons(requests);
         
-        // Persist rooms and timeslots to ensure they have IDs
+        // Persist all entities
         roomRepository.persist(rooms);
         timeslotRepository.persist(timeslots);
         lessonRepository.persist(lessons);
@@ -52,28 +57,44 @@ public class TimetableGeneratorService {
         TimeTable problem = new TimeTable(timeslots, rooms, lessons);
         
         try {
-            // Generate unique problem ID
             Long problemId = System.currentTimeMillis();
             logger.info("Submitting problem with ID: {}", problemId);
             
-            // Submit problem to solver
-            return solverManager.solveAndListen(
+            TimeTable solution = solverManager.solveAndListen(
                 problemId,
                 (timeTableId) -> problem,
-                // Solution handler
-                (timeTable) -> {
-                    logger.info("New best solution found: {}", timeTable.getScore());
-                },
-                // Problem handler
-                (timeTableId, throwable) -> {
-                    logger.error("Solver failed for problem {}", timeTableId, throwable);
-                }
+                this::updateSolution,
+                (timeTableId, throwable) -> logger.error("Solver failed for problem {}", timeTableId, throwable)
             ).getFinalBestSolution();
+            
+            // Persist the final solution
+            persistSolution(solution);
+            
+            return solution;
             
         } catch (ExecutionException | InterruptedException e) {
             logger.error("Solver execution failed", e);
             throw new RuntimeException("Failed to solve timetable", e);
         }
+    }
+
+    @Transactional
+    protected void updateSolution(TimeTable timeTable) {
+        logger.info("New best solution found: {}", timeTable.getScore());
+        persistSolution(timeTable);
+    }
+
+    @Transactional
+    protected void persistSolution(TimeTable solution) {
+        // Update lessons with their assigned rooms and timeslots
+        solution.getLessonList().forEach(lesson -> {
+            Lesson entity = lessonRepository.findById(lesson.getId());
+            if (entity != null) {
+                entity.setRoom(lesson.getRoom());
+                entity.setTimeslot(lesson.getTimeslot());
+                lessonRepository.persist(entity);
+            }
+        });
     }
 
     private List<Room> createRooms(int roomCount) {
