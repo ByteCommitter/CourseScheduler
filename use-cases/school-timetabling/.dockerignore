@@ -1,3 +1,11 @@
-*
-!target/*-runner
-!target/quarkus-app/*
+**/target/
+**/.classpath
+**/.project
+**/.settings
+**/.factorypath
+**/node_modules
+**/.env
+
+# Allow
+!pom.xml
+!src/
