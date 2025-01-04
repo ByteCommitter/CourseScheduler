@@ -4,4 +4,4 @@ docker build -t quarkus-timetabling .
 
 verify image with: docker images
 
-docker run -p 8081:8081 quarkus-timetabling
+docker run -p 8080:8080 quarkus-timetabling
