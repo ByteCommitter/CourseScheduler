@@ -4,7 +4,7 @@ Use Puttygen for conversions
     - Convert .ppk key for aws cmd login, to act as pubKey
 Connect to aws cmd using the cmd in the screenshot.
 Use thse commands for setup:
-    - ssh -i path\to\your\key.ecdsa ec2-user@ec2-13-61-24-87.eu-north-1.compute.amazonaws.com
+    - ssh -i C:\Users\Dell\Downloads\awspasskey ec2-user@ec2-13-61-24-87.eu-north-1.compute.amazonaws.com
     - Set up the env also:
         -sudo dnf update -y
         -sudo dnf install java-17-amazon-corretto -y
@@ -15,3 +15,5 @@ Setup the files required for the app to run:
         -quarkus-app/app/ # Contains your application JAR
         -quarkus-app/quarkus/ # Contains Quarkus runtime files
         -quarkus-app/quarkus-run.jar # The main executable JAR
+
+We setup the docker file, so shall transfer that to the ec2.

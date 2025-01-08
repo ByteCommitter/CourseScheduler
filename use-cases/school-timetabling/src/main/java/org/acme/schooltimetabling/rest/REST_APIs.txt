@@ -1,0 +1,51 @@
+REST resources:
+/hello
+GET /hello
+Produces: application/json
+/roomSchedule
+GET /roomSchedule/{roomId}
+Produces: application/json
+/timeslots
+POST /timeslots
+Consumes: application/json
+Produces: application/json
+DELETE /timeslots/{id}
+Consumes: application/json
+Produces: application/json
+/timetable-generator
+POST /timetable-generator
+Consumes: multipart/form-data
+Produces: text/plain
+lessons
+GET lessons
+Produces: application/json
+POST lessons
+Consumes: application/json
+Produces: application/json
+GET lessons/count
+Produces: application/json
+DELETE lessons/{id}
+GET lessons/{id}
+Produces: application/json
+PUT lessons/{id}
+Consumes: application/json
+Produces: application/json
+rooms
+GET rooms
+Produces: application/json
+POST rooms
+Consumes: application/json
+Produces: application/json
+GET rooms/count
+Produces: application/json
+DELETE rooms/{id}
+GET rooms/{id}
+Produces: application/json
+PUT rooms/{id}
+Consumes: application/json
+Produces: application/json
+timeTable
+GET timeTable
+POST timeTable/solve
+POST timeTable/stopSolving
+GET timeTable/{id}

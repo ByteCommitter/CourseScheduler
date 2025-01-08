@@ -1,0 +1,26 @@
+1. Transfer Steps:
+- Connect to EC2 using WinSCP
+- Create directory on EC2: mkdir -p /home/ec2-user/timetabling
+- Transfer these files to /home/ec2-user/timetabling/:
+  ├── Dockerfile
+  └── target/
+      └── quarkus-app/
+          ├── lib/
+          ├── app/
+          ├── quarkus/
+          └── quarkus-run.jar
+
+2. EC2 Commands (run in order):
+sudo yum update -y
+sudo yum install docker -y
+sudo service docker start
+sudo usermod -a -G docker ec2-user
+sudo chmod 666 /var/run/docker.sock
+
+cd /home/ec2-user/timetabling
+sudo docker build -t timetabling .
+sudo docker run -d -p 8080:8080 timetabling
+
+3. Verify:
+http://[YOUR-EC2-PUBLIC-IP]:8080
+http://[YOUR-EC2-PUBLIC-IP]:8080/q/swagger-ui

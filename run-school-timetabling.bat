@@ -39,13 +39,13 @@ call "%MVN_CMD%" clean quarkus:dev ^
     -Ddebug=false ^
     -Dquarkus.http.host=0.0.0.0 ^
     -Dstartup-open-browser=true ^
-    -Dquarkus.live-reload.url=http://localhost:8081
+    -Dquarkus.live-reload.url=http://localhost:8080
 
 if errorlevel 1 goto error
 
 :success
 echo Application started successfully
-echo Visit http://localhost:8081 in your browser
+echo Visit http://localhost:8080 in your browser
 goto end
 
 :error
