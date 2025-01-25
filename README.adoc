@@ -1,6 +1,9 @@
 = OptaPlanner Timetabling
 
 Built special use case APIs on top of the School Timetable
+
+APIs available at : http://ec2-13-61-24-87.eu-north-1.compute.amazonaws.com:8080/q/swagger-ui/#/ [hosted as an ec2 instance]
+
 == Use cases
 
 [[school-timetabling]]
