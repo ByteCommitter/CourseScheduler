@@ -1,5 +1,6 @@
-= OptaPlanner Quickstarts
+= OptaPlanner Timetabling
 
+Built special use case APIs on top of the School Timetable
 == Use cases
 
 [[school-timetabling]]
@@ -13,6 +14,4 @@ image::build/quickstarts-showcase/src/main/resources/META-INF/resources/screensh
 * link:technology/java-spring-boot/README.adoc[Run spring-boot-school-timetabling] (Java, Maven or Gradle, Spring Boot, H2)
 * link:technology/java-activemq-quarkus/README.adoc[Run activemq-quarkus-school-timetabling] (Java, ActiveMQ, Maven, Quarkus)
 * link:technology/kotlin-quarkus/README.adoc[Run kotlin-quarkus-school-timetabling] (Kotlin, Maven, Quarkus, H2)
-* link:use-cases/vehicle-routing/README.adoc[Run quarkus-vehicle-routing] (Java, Maven or Gradle, Quarkus)
-
 
